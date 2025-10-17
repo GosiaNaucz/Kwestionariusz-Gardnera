@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kwestionariusz uzdolnień wg Gardnera</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        // 🔑 Inicjalizacja EmailJS
+        (function() {
+            emailjs.init("P7Bvn22coy54FqQHV"); 
+        })();
+    </script>
+    <style>
+        /* Styl bazowy */
+        .question-container {
+            position: relative;
+            transition: background 0.3s;
+        }
+        /* Styl dla zaznaczonego kontenera */
+        .selected {
+            background-color: #e0f2fe; /* light blue-100 */
+        }
+        /* Ptaszek */
+        .checkmark {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 1.5rem;
+            color: green;
+            display: none;
+        }
+        /* Pokaż ptaszek tylko, gdy kontener jest zaznaczony */
+        .selected .checkmark {
+            display: inline;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-700 mb-2 border-b-4 border-blue-500 pb-2">
+            Kwestionariusz uzdolnień wg H. Gardnera ✨
+        </h1>
+<p>
+<strong>Zacznij Odkrywać Swój Potencjał!</strong><br>
+Ten kwestionariusz to Twoja szansa, by spojrzeć na siebie z zupełnie nowej perspektywy i zidentyfikować swoje najsilniejsze, unikalne uzdolnienia w świetle przełomowej Teorii Wielorakich Inteligencji Howarda Gardnera.</p><br>
+
+<p><strong>Pamiętaj:</strong> to nie jest test sprawdzający wiedzę! To narzędzie samopoznania, które pomoże Ci lepiej zrozumieć, jak myślisz, jak się uczysz i jak najskuteczniej rozwiązujesz problemy.</p><br>
+
+<p><strong>Dlaczego warto?</strong><br>
+Proszę, odpowiadaj szczerze i intuicyjnie! Ustalenie Twojego profilu inteligencji to klucz do:<br>
+<ul  class="list-disc ml-6">
+    <li> <strong>Lepszych decyzji:</strong> Świadomy wybór ścieżki edukacyjnej lub kariery, która odpowiada Twoim naturalnym predyspozycjom.</li>
+
+	<li><strong>Efektywności:</strong> Uczenie się i działanie w sposób, który jest dla Ciebie najbardziej naturalny i skuteczny.</li>
+
+	<li><strong>Wzrostu:</strong> Wzmacnianie poczucia własnej wartości i wykorzystywanie pełni Twojego potencjału.</li>
+</ul>
+<br>
+<p><strong>Instrukcja</strong><br>
+Nie ma złych ani dobrych odpowiedzi – są tylko Twoje unikalne talenty czekające na odkrycie!<br> Zaczynamy?</p><br>
+
+<p>Poniżej znajdziesz serię stwierdzeń. Przeczytaj każde z nich i przyznaj sobie od 0 do 5 punktów, w zależności od tego, jak bardzo dane sformułowanie pasuje do Ciebie:</p>
+<ul class="list-disc ml-6">
+	<li>0 punktów: W ogóle do mnie nie pasuje.</li>
+	<li>5 punktów: Pasuje do mnie idealnie.</li>
+</ul>
+<br>
+        <form id="quizForm" class="space-y-4">
+            <div class="p-4 bg-gray-50 rounded-lg shadow-inner mb-8">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">Twoje dane</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input type="text" name="user_name" placeholder="Imię" required class="p-2 border border-gray-300 rounded-md" />
+                    <input type="text" name="klasa" placeholder="Klasa (np. 7a)" required class="p-2 border border-gray-300 rounded-md" />
+                    <input type="number" name="nr" placeholder="Nr w dzienniku" required class="p-2 border border-gray-300 rounded-md" />
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-blue-600 text-white py-2 rounded-xl shadow hover:bg-blue-700 transition">
+                Wyślij wyniki
+            </button>
+        </form>
+
+        <p id="statusMsg" class="text-center mt-4 font-semibold"></p>
+        <div id="interpretation" class="mt-6 space-y-4 w-full"></div>
+    </div>
+
+    <script>
+        // --- DEKLARACJE DANYCH ---
+        const questions = [
+            "Lubię rozwiązywać zagadki i problemy logiczne.",
+            "Jestem dobry w liczeniu w pamięci, szacowaniu i mierzeniu.",
+            "Jestem dobry w wyszukiwaniu połączeń pomiędzy zagadnieniami.",
+            "Lubię przedmioty ścisłe i techniczne.",
+            "Potrafię dobrze zaplanować czas, jaki poświęcam na pracę domową i uczę się dobrze wyjaśnieniom.",
+            "Lubię słowa – dzięki czytaniu książek, chodzeniu do teatru, poezji.",
+            "Lubię rozwiązywać krzyżówki i zagadki słowne.",
+            "Łatwo uczę się z książek, kaset, Internetu i wykładów.",
+            "Jestem dobrym rozmówcą, posługuję się bogatym słownictwem.",
+            "Dobrze piszę np. opowiadania, poezję, listy, polecenia.",
+            "Lubię ćwiczenia fizyczne.",
+            "Uczę się dobrze, gdy mogę coś wykonać.",
+            "Jestem dobry w sporcie i grach.",
+            "Mam zdolności manualne, np. potrafię sporządzać modele, majsterkować, szyć.",
+            "W tańcu czuję się jak ryba w wodzie.",
+            "Jestem dobry w tworzeniu muzyki, śpiewaniu lub graniu na instrumentach.",
+            "Z łatwością zapamiętuję wiersze, poezję i rymowanki.",
+            "Często słucham muzyki i łatwo przychodzi mi rozpoznawanie melodii.",
+            "Mam dobre wyczucie rytmu.",
+            "Czytam nuty, umiem komponować muzykę.",
+            "Jestem wrażliwy na to, co myślą i czują inni.",
+            "Jestem przekonujący i potrafię uczyć innych tego, czego się nauczyłem.",
+            "Lubię należeć do klubów lub kółek zainteresowań.",
+            "Lubię pracować w zespole i dobrze przychodzi mi uczenie się w grupie.",
+            "Łatwo zawieram przyjaźnie.",
+            "Mam zmysł orientacji i potrafię dobrze oceniać odległości i przestrzenie.",
+            "Jestem dobry w wyobrażaniu sobie rzeczy w umyśle.",
+            "Jestem dobrym obserwatorem. Dostrzegam rzeczy, których nie zauważają inni.",
+            "Uczę się z wykresów, diagramów i map.",
+            "Jestem dobry w sztuce, modelowaniu lub rzeźbieniu.",
+            "Interesują mnie kwestie związane ze środowiskiem naturalnym.",
+            "Podobają mi się programy przyrodnicze i/lub trzymam w domu zwierzęta.",
+            "Potrafię rozpoznać i nazwać wiele rodzajów kwiatów, roślin i drzew.",
+            "Potrafię wyobrazić sobie siebie pracującego w rolnictwie albo jako biologa lub astronoma.",
+            "Interesują mnie sprawy związane ze zdrowym życiem, zdrowym jedzeniem itp.",
+            "Jestem dobry w tworzeniu planów i określaniu swoich celów.",
+            "Lubię pracować/uczyć się samotnie i w ciszy.",
+            "Jestem dobry w uczeniu się na swoich błędach i doświadczeniach.",
+            "Prowadzę pamiętnik lub zapiski.",
+            "Przejmuję się losami naszej planety."
+        ];
+
+        const intelligenceMap = {
+            "Matematyczno–logiczna": [1,2,3,4,5],
+            "Językowa": [6,7,8,9,10],
+            "Ruchowa": [11,12,13,14,15],
+            "Muzyczna": [16,17,18,19,20],
+            "Interpersonalna": [21,22,23,24,25],
+            "Wizualno–przestrzenna": [26,27,28,29,30],
+            "Przyrodnicza": [31,32,33,34,35],
+            "Intrapersonalna": [36,37,38,39,40]
+        };
+
+        const descriptions = {
+            "Matematyczno–logiczna": {
+                text: "To osoby, które mają rozwiniętą tą inteligencję lubią liczyć, rozwiązywać zagadki logiczne, eksperymentować, wyciągać wnioski. Często uczą się poprzez robienie notatek, schematów. Są zorganizowane, systematyczne, dokładne, potrafią myśleć abstrakcyjnie. ",
+                careers: "Przydatność w zawodach: Mechanik, kucharz, prawnik, analityk danych, księgowy,bankier, architekt, statystyk, inżynier, informatyk, detektyw."
+            },
+            "Językowa": {
+                text: "To osoby, które mają rozwiniętą tą inteligencję lubią czytać, słuchać, pisać, opowiadać, przemawiać. Lubią zabawy ze słowami, nie mają problemów z ortografią. Są systematyczne i uporządkowane. ",
+                careers: "Przydatność w zawodach: Dziennikarz, copywriter, polityk, tłumacz, content creator, sprzedawca, kelner, poeta, przedstawiciel handlowy, pisarz, korektor."
+            },
+            "Ruchowa": {
+                text: "osoby, które mają rozwiniętą tą inteligencję lubią prace ręczne, prace mechaniczne. Najchętniej uczą się przez wykonywanie konkretnych zadań. Zapamiętują wtedy, gdy same coś wykonują, a nie wtedy gdy o tym przeczytają lub ktoś im to pokaże. Mają szybki refleks, ale nie lubią siedzieć zbyt długo w jednym miejscu. ",
+                careers: "Przydatność w zawodach: Fizjoterapeuta, fryzjer, cukiernik, trener, technik robotyki, kucharz."
+            },
+            "Muzyczna": {
+                text: "To osoby, które mają rozwiniętą tą inteligencję są wrażliwe na muzykę i dźwięki, ton głosu. Często uczą się poprzez słuchanie. Chętnie słuchają muzyki. Zdecydowanie preferują lektury w formie audiobooków. Języków obcych uczą się ze słuchu.  ",
+                careers: "Przydatność w zawodach: Muzyk, producent muzyczny, dźwiękowiec, terapeuta muzyczny."
+            },
+            "Interpersonalna": {
+                text: "To osoby, które mają rozwiniętą tą inteligencję lubią być z ludźmi. Chętnie uczestniczą w zajęciach grupowych, łatwo dogadują się z innymi. Szybko odgadują intencje innych osób, potrafią rozwiązywać konflikty, łatwo nawiązują kontakty, dobrze prowadzą negocjacje. ",
+                careers: "Przydatność w zawodach: Sprzedawca, mediator, menedżer, HR, coach, wszystkie zawody związane z usługami."
+            },
+            "Wizualno–przestrzenna": {
+                text: "To osoby, które mają rozwiniętą tą inteligencję lubią rysować, nie mają problemów z czytaniem map, wykresów, schematów, tabel, mają dobre wyczucie koloru. Myślą obrazowo, robią notatki w formie rysunków i wykresów. Myślą używając wyobraźni i obrazów. Są wrażliwe na otaczające przedmioty, kolory i wzory, lubią rysować, rzeźbić i wytwarzać używając kolorów i różnego typu materiałów. ",
+                careers: "Przydatność w zawodach: Architekt, grafik, projektant UX/UI, twórca gier."
+            },
+            "Przyrodnicza": {
+                text: "To osoby, które mają rozwiniętą tą inteligencję lubią pracę na świeżym powietrzu. Wszystko co jest związane z ekologią i ochroną środowiska ma dla nich duże znaczenie. Lubią prace związane z hodowlą zwierząt lub uprawą roślin. ",
+                careers: "Przydatność w zawodach: Ekolog, weterynarz, dietetyk, rolnik, ogrodnik, zootechnik."
+            },
+            "Intrapersonalna": {
+                text: "osoby, które mają rozwiniętą tą inteligencję mają dobrze rozwiniętą intuicję. Nie potrzebują motywacji do działania z zewnątrz – same wiedzą co i dlaczego chcą robić. Mają dużą wiedzę na temat samego siebie – potrafią nazwać swoje cele, aspiracje, plany, mocne strony ale także ograniczenia. Są refleksyjne, często preferują pracę samodzielną. ",
+                careers: "Przydatność w zawodach: Psycholog, pisarz, pedagog, psychiatra, ksiądz, etyk, kompozytor, konsultant rozwoju."
+            }
+        };
+
+        // --- TWORZENIE PYTAŃ ---
+        const form = document.getElementById("quizForm");
+
+        questions.forEach((q, i) => {
+            const bgColor = i % 2 === 0 ? "bg-yellow-50" : "bg-blue-50";
+            const div = document.createElement("div");
+            div.className = `question-container p-4 rounded-xl shadow ${bgColor} q-index-${i}`; 
+            div.innerHTML = `
+                <p class="mb-1 font-medium">${i + 1}. ${q}</p>
+                <p class="text-sm text-gray-600 mb-2">1 – najmniej pasuje, 5 – najbardziej pasuje</p>
+                <div class="flex gap-4">
+                    ${[1,2,3,4,5].map(v =>
+                        `<label class="inline-flex items-center">
+                            <input type="radio" name="q${i+1}" value="${v}" required>
+                            <span class="ml-1">${v}</span>
+                        </label>`).join("")}
+                </div>
+                <span class="checkmark">✅</span>
+            `;
+            form.insertBefore(div, form.querySelector("button[type='submit']"));
+        });
+
+        // --- OBSŁUGA ZAZNACZENIA ---
+        form.addEventListener("change", e => {
+            if (e.target.type === "radio") {
+                const container = e.target.closest(".question-container");
+                const radioName = e.target.name; 
+                
+                // Usuń klasę 'selected' ze wszystkich kontenerów w tej grupie pytań
+                document.querySelectorAll(`input[name="${radioName}"]`).forEach(radio => {
+                    radio.closest(".question-container").classList.remove("selected");
+                });
+
+                // Dodaj klasę 'selected' tylko do kontenera z zaznaczoną opcją
+                container.classList.add("selected");
+            }
+        });
+
+        // --- OBLICZANIE WYNIKÓW ---
+        function calculateScores(data) {
+            const scores = {};
+            for (const [key, idxs] of Object.entries(intelligenceMap)) {
+                scores[key] = idxs.reduce((sum, i) => sum + Number(data.get(`q${i}`) || 0), 0);
+            }
+            return scores;
+        }
+
+        // --- GENEROWANIE TEKSTU DO EMAILA (czysty tekst) ---
+        function buildResultsText(scores, fd) {
+            let text = `Wypełniono przez: ${fd.get("user_name")}\nKlasa: ${fd.get("klasa")}\nNr w dzienniku: ${fd.get("nr")}\n\n`;
+            text += "--- WYNIKI PUNKTOWE ---\n";
+            for (const [k,v] of Object.entries(scores)) text += `- ${k}: ${v} / 25\n`; 
+            
+            const max = Math.max(...Object.values(scores));
+            const dom = Object.keys(scores).filter(k => scores[k] === max);
+            
+            text += "\n--- DOMINUJĄCE INTELIGENCJE ---\n";
+            dom.forEach(k => {
+                text += `\n> ${k} (Wynik: ${scores[k]} pkt)\n`;
+                text += `Opis: ${descriptions[k].text}\n`;
+                text += `Zawody: ${descriptions[k].careers}\n`;
+            });
+            return text;
+        }
+
+        // --- INTERPRETACJA WYNIKÓW (dla ucznia, HTML) ---
+        function showInterpretation(scores) {
+            const max = Math.max(...Object.values(scores));
+            const dom = Object.keys(scores).filter(k => scores[k] === max);
+            
+            const html = `
+                <h2 class="text-2xl font-bold text-green-700 mb-4">Twój Wynik i Interpretacja</h2>
+                <div class="p-4 bg-gray-50 rounded-xl shadow">
+                    <h3 class="text-lg font-bold mb-2">Szczegółowe wyniki punktowe:</h3>
+                    <ul class="list-disc list-inside">
+                        ${Object.entries(scores).map(([k,v]) => `<li><b>${k}:</b> ${v} / 25</li>`).join("")}
+                    </ul>
+                </div>
+                <h3 class="text-xl font-bold text-blue-600 mt-6 mb-4">Twoje dominujące uzdolnienia:</h3>
+                ${dom.map(k => `
+                    <div class="p-4 bg-blue-100 border-l-4 border-blue-500 rounded-xl shadow-md">
+                        <h4 class="text-xl font-extrabold text-blue-800 mb-2">${k} (wynik: ${scores[k]})</h4>
+                        <p class="text-gray-700">${descriptions[k].text}</p>
+                        <p class="mt-2 text-sm"><b>Potencjalne zawody:</b> ${descriptions[k].careers}</p>
+                    </div>`).join("")}
+            `;
+            document.getElementById("interpretation").innerHTML = html;
+            document.getElementById("interpretation").scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- WYSYŁANIE FORMULARZA (EMAILJS) ---
+        form.addEventListener("submit", e => {
+            e.preventDefault();
+            const fd = new FormData(form);
+            
+            const scores = calculateScores(fd);
+            
+            // 1. Pokaż wyniki użytkownikowi
+            showInterpretation(scores);
+
+            // 2. Zbuduj tekst do wysłania w emailu
+            const wynikiTxt = buildResultsText(scores, fd); 
+
+            // 3. Przygotowanie parametrów zgodnych z Twoim szablonem EmailJS
+            const templateParams = {
+                user_name: fd.get("user_name"), 
+                nr: fd.get("nr"),           
+                klasa: fd.get("klasa"),     
+                results: wynikiTxt,        
+                subject: "Kwestionariusz uzdolnień"
+            };
+
+            // Wysłanie danych
+            emailjs.send("service_cb5180m", "doradztwo_WSDZ", templateParams)
+                .then(() => {
+                    const msg = document.getElementById("statusMsg");
+                    msg.textContent = "✅ Wyniki zostały pomyślnie wysłane do doradcy!";
+                    msg.className = "text-green-600 text-center mt-4 font-extrabold";
+                    form.querySelector("button[type='submit']").disabled = true;
+                })
+                .catch(err => {
+                    console.error("EmailJS error:", err);
+                    const msg = document.getElementById("statusMsg");
+                    msg.textContent = "❌ Wystąpił błąd podczas wysyłki. Spróbuj ponownie.";
+                    msg.className = "text-red-600 text-center mt-4 font-extrabold";
+                });
+        });
+    </script>
+</body>
+</html>
